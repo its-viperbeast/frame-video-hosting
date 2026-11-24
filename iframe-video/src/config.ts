@@ -1,6 +1,7 @@
 export const NO_REFERRER_HOSTS: readonly string[] = ["video.twimg.com"];
 
 export const STORAGE_POSITION_PREFIX = "video-player:pos:";
+export const STORAGE_MUTED_KEY = "video-player:muted";
 
 export const IDLE_HIDE_MS = 2500;
 export const DOUBLE_TAP_MS = 350;

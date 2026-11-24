@@ -11,6 +11,7 @@ import {
   PLAYBACK_RATE_STEP,
   RESUME_END_MARGIN_SEC,
   SKIP_SECONDS,
+  STORAGE_MUTED_KEY,
   STORAGE_POSITION_PREFIX,
   SYNC_EVENTS,
 } from "../config";
@@ -99,6 +100,10 @@ export function VideoPlayer({
     const togglePlay = () => {
       if (video.paused) void video.play().catch(() => {});
       else video.pause();
+    };
+    const isMuted = () => video.muted || !video.volume;
+    const saveMuted = () => {
+      store[STORAGE_MUTED_KEY] = isMuted() ? "1" : "0";
     };
 
     let resumeAt = Number(store[positionKey]) || 0;
@@ -231,12 +236,16 @@ export function VideoPlayer({
       if (!video.paused) root.classList.add("is-started");
       root.classList.toggle("is-playing", !video.paused);
       root.classList.toggle("is-waiting", !video.paused && video.readyState < 3);
-      root.classList.toggle("is-muted", video.muted || !video.volume);
+      root.classList.toggle("is-muted", isMuted());
       volume.valueAsNumber = video.muted ? 0 : video.volume;
       volume.style.cssText = `--p:${volume.valueAsNumber * 100}%`;
       speed.textContent = `${video.playbackRate}x`;
       wakeControls();
     };
+
+    if (store[STORAGE_MUTED_KEY] === "1") video.muted = true;
+    else if (store[STORAGE_MUTED_KEY] === "0") video.muted = false;
+    syncUi();
 
     root.classList.toggle("has-resume", resumeAt > 0);
     const resumeLabel = root.querySelector("[data-at]");
@@ -268,6 +277,11 @@ export function VideoPlayer({
     const onVolumeInput = () => {
       video.volume = volume.valueAsNumber;
       video.muted = !video.volume;
+      saveMuted();
+    };
+    const onVolumeChange = () => {
+      saveMuted();
+      syncUi();
     };
     const onPointerMove = (event: PointerEvent) => {
       if (event.pointerType === "mouse") wakeControls();
@@ -345,7 +359,9 @@ export function VideoPlayer({
     video.addEventListener("progress", updateProgress);
     video.addEventListener("durationchange", updateProgress);
     video.addEventListener("error", showError);
-    for (const type of SYNC_EVENTS) video.addEventListener(type, syncUi);
+    for (const type of SYNC_EVENTS) {
+      video.addEventListener(type, type === "volumechange" ? onVolumeChange : syncUi);
+    }
     seek.addEventListener("input", onSeekInput);
     seek.addEventListener("pointermove", onSeekPointerMove);
     volume.addEventListener("input", onVolumeInput);
@@ -409,7 +425,9 @@ export function VideoPlayer({
       video.removeEventListener("progress", updateProgress);
       video.removeEventListener("durationchange", updateProgress);
       video.removeEventListener("error", showError);
-      for (const type of SYNC_EVENTS) video.removeEventListener(type, syncUi);
+      for (const type of SYNC_EVENTS) {
+        video.removeEventListener(type, type === "volumechange" ? onVolumeChange : syncUi);
+      }
       seek.removeEventListener("input", onSeekInput);
       seek.removeEventListener("pointermove", onSeekPointerMove);
       volume.removeEventListener("input", onVolumeInput);
