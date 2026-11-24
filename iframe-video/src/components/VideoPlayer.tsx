@@ -504,7 +504,13 @@ export function VideoPlayer({
       {poster ? (
         <img className="video-player__poster" src={poster} alt="" draggable={false} />
       ) : null}
-      <img className="video-player__buffering" alt="" aria-hidden="true" draggable={false} />
+      <img
+        className="video-player__buffering"
+        alt=""
+        aria-hidden="true"
+        draggable={false}
+        referrerPolicy="origin"
+      />
       <span className="video-player__hint" aria-hidden="true" />
       {title ? <h1 className="video-player__title">{title}</h1> : null}
 

@@ -15,7 +15,6 @@ export default function IframeGenerator() {
   src="${iframeUrl}"
   style="position:absolute;inset:0;width:100%;height:100%;border:0;"
   sandbox="allow-scripts allow-same-origin"
-  referrerpolicy="no-referrer"
   allow="fullscreen; encrypted-media"
   title="Video Player"
   loading="lazy"
