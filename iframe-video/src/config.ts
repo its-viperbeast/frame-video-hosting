@@ -1,5 +1,8 @@
 export const NO_REFERRER_HOSTS: readonly string[] = ["video.twimg.com"];
 
+export const DEVTOOLS_CHECK_MS = 500;
+export const DEVTOOLS_SIZE_THRESHOLD_PX = 160;
+
 export const STORAGE_POSITION_PREFIX = "video-player:pos:";
 
 export const IDLE_HIDE_MS = 2500;

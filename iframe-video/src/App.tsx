@@ -1,8 +1,9 @@
 import type { ReactNode } from 'react'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { BrowserRouter, Navigate, Route, Routes, useParams } from 'react-router-dom'
 import { VideoPlayer } from './components/VideoPlayer'
 import { decodeVideoPayload } from './lib/decodeVideoUrl'
+import { watchDevTools } from './lib/detectDevTools'
 
 function Message({ title, body }: { title: string; body: ReactNode }) {
   return (
@@ -25,11 +26,7 @@ function VideoPage() {
     return (
       <Message
         title="Invalid video link"
-        body={
-          !encoded
-            ? 'Error: Unauthorized'
-            : 'Error: Forbidden'
-        }
+        body={!encoded ? 'Error: Unauthorized' : 'Error: Forbidden'}
       />
     )
   }
@@ -42,6 +39,14 @@ function VideoPage() {
 }
 
 export default function App() {
+  const [devToolsOpen, setDevToolsOpen] = useState(false)
+
+  useEffect(() => watchDevTools(setDevToolsOpen), [])
+
+  if (devToolsOpen) {
+    return <Message title="Close Dev Tools" body="Playback is blocked while developer tools are open." />
+  }
+
   return (
     <BrowserRouter>
       <Routes>
