@@ -52,17 +52,7 @@ export default function App() {
       <Routes>
         <Route
           path="/"
-          element={
-            <Message
-              title="Ready to play"
-              body={
-                <>
-                  Open a link like <code>/video/&lt;base64&gt;</code> where the payload is{' '}
-                  <code>video_url|thumbnail_url|title</code>.
-                </>
-              }
-            />
-          }
+          element={<Message title="Unauthorized" body="Error: Unauthorized" />}
         />
         <Route path="/video/*" element={<VideoPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
