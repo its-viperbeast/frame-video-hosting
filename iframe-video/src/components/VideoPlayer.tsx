@@ -59,7 +59,7 @@ export function VideoPlayer({
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const videoUrl = new URL(url);
-  const isHls = isHlsPlaylist(videoUrl);
+  const hasPlaylistExtension = isHlsPlaylist(videoUrl);
   const noReferrer = NO_REFERRER_HOSTS.includes(videoUrl.hostname);
 
   useEffect(() => {
@@ -96,7 +96,7 @@ export function VideoPlayer({
 
     if (noReferrer) {
       video.setAttribute("referrerpolicy", "no-referrer");
-      if (!isHls) video.src = url;
+      if (!hasPlaylistExtension) video.src = url;
     }
 
     let resumeAt = Number(store[positionKey]) || 0;
@@ -109,13 +109,23 @@ export function VideoPlayer({
     let skipAccum = 0;
     let pickedQuality = -1;
     let hls: Hls | null = null;
+    let hlsAttempted = false;
+    let playRequested = false;
     let disposed = false;
 
     const showError = () => root.classList.add("is-error");
 
+    const requestPlay = () => {
+      playRequested = true;
+      void video.play().catch(() => {});
+    };
+
     const togglePlay = () => {
-      if (video.paused) void video.play().catch(() => {});
-      else video.pause();
+      if (video.paused) requestPlay();
+      else {
+        playRequested = false;
+        video.pause();
+      }
     };
 
     const qualityLabel = (level: { height: number; bitrate: number }) =>
@@ -204,7 +214,7 @@ export function VideoPlayer({
           delete store[positionKey];
           video.currentTime = 0;
           root.classList.remove("has-resume");
-          void video.play().catch(() => {});
+          requestPlay();
           return;
         }
         togglePlay();
@@ -381,12 +391,67 @@ export function VideoPlayer({
       );
     };
 
+    const loadHls = async () => {
+      if (hlsAttempted) return;
+      hlsAttempted = true;
+      try {
+        const { default: HlsJs } = await import("hls.js/light");
+        if (disposed) return;
+
+        if (HlsJs.isSupported()) {
+          const player = new HlsJs(
+            noReferrer
+              ? {
+                  fetchSetup(context, init) {
+                    return new Request(context.url, { ...init, referrerPolicy: "no-referrer" });
+                  },
+                }
+              : undefined,
+          );
+          hls = player;
+          player.on(HlsJs.Events.MEDIA_ATTACHED, () => {
+            if (playRequested && video.paused) requestPlay();
+          });
+          player.on(HlsJs.Events.MANIFEST_PARSED, buildQualityMenu);
+          player.on(HlsJs.Events.ERROR, (_event, data) => {
+            if (data.fatal) showError();
+          });
+          player.loadSource(url);
+          player.attachMedia(video);
+          return;
+        }
+
+        if (hasPlaylistExtension && video.canPlayType("application/vnd.apple.mpegurl")) {
+          video.src = url;
+          if (playRequested) requestPlay();
+          return;
+        }
+
+        showError();
+      } catch {
+        if (!disposed) showError();
+      }
+    };
+
+    const onVideoError = () => {
+      // A playlist can be served from the same kind of URL as a regular video.
+      if (
+        !hasPlaylistExtension &&
+        !hlsAttempted &&
+        video.error?.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED
+      ) {
+        void loadHls();
+        return;
+      }
+      showError();
+    };
+
     video.addEventListener("loadedmetadata", onLoadedMetadata, { once: true });
     video.addEventListener("timeupdate", onTimeUpdate);
     video.addEventListener("ended", onEnded);
     video.addEventListener("progress", updateProgress);
     video.addEventListener("durationchange", updateProgress);
-    video.addEventListener("error", showError);
+    video.addEventListener("error", onVideoError);
     for (const type of SYNC_EVENTS) video.addEventListener(type, syncUi);
     seek.addEventListener("input", onSeekInput);
     seek.addEventListener("pointermove", onSeekPointerMove);
@@ -396,49 +461,7 @@ export function VideoPlayer({
     root.addEventListener("keydown", onKeyDown);
     root.addEventListener("click", onClick);
 
-    if (isHls) {
-      video.addEventListener(
-        "play",
-        () => {
-          import("hls.js/light")
-            .then(({ default: HlsJs }) => {
-              if (disposed) return;
-
-              if (HlsJs.isSupported()) {
-                const player = new HlsJs(
-                  noReferrer
-                    ? {
-                        fetchSetup(context, init) {
-                          return new Request(context.url, {
-                            ...init,
-                            referrerPolicy: "no-referrer",
-                          });
-                        },
-                      }
-                    : undefined,
-                );
-                hls = player;
-                player.on(HlsJs.Events.MANIFEST_PARSED, buildQualityMenu);
-                player.on(HlsJs.Events.ERROR, (_event, data) => {
-                  if (data.fatal) showError();
-                });
-                player.loadSource(url);
-                player.attachMedia(video);
-                return;
-              }
-
-              if (video.canPlayType("application/vnd.apple.mpegurl")) {
-                video.src = url;
-                return;
-              }
-
-              showError();
-            })
-            .catch(showError);
-        },
-        { once: true },
-      );
-    }
+    if (hasPlaylistExtension) video.addEventListener("play", loadHls, { once: true });
 
     return () => {
       disposed = true;
@@ -452,7 +475,8 @@ export function VideoPlayer({
       video.removeEventListener("ended", onEnded);
       video.removeEventListener("progress", updateProgress);
       video.removeEventListener("durationchange", updateProgress);
-      video.removeEventListener("error", showError);
+      video.removeEventListener("error", onVideoError);
+      video.removeEventListener("play", loadHls);
       for (const type of SYNC_EVENTS) video.removeEventListener(type, syncUi);
       seek.removeEventListener("input", onSeekInput);
       seek.removeEventListener("pointermove", onSeekPointerMove);
@@ -462,7 +486,7 @@ export function VideoPlayer({
       root.removeEventListener("keydown", onKeyDown);
       root.removeEventListener("click", onClick);
     };
-  }, [url, isHls, noReferrer]);
+  }, [url, hasPlaylistExtension, noReferrer]);
 
   return (
     <div
@@ -472,7 +496,11 @@ export function VideoPlayer({
       role="region"
       aria-label={title || "Video"}
     >
-      <video src={isHls || noReferrer ? undefined : url} preload="auto" playsInline />
+      <video
+        src={hasPlaylistExtension || noReferrer ? undefined : url}
+        preload="auto"
+        playsInline
+      />
       {poster ? (
         <img className="video-player__poster" src={poster} alt="" draggable={false} />
       ) : null}
