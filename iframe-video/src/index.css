@@ -1,0 +1,66 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  background: #050508;
+  color: #f4f4f5;
+  font-family: Poppins, system-ui, sans-serif;
+  font-feature-settings: 'tnum' 1;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  overflow: hidden;
+}
+
+.embed-shell {
+  width: 100%;
+  height: 100%;
+  background: #000;
+}
+
+.embed-message {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  height: 100%;
+  padding: 1.5rem;
+  text-align: center;
+  background:
+    radial-gradient(ellipse 60% 50% at 50% 40%, rgb(139 92 246 / 0.18), transparent 70%),
+    #050508;
+}
+
+.embed-message__title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #fafafa;
+}
+
+.embed-message__body {
+  margin: 0;
+  max-width: 22rem;
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.55;
+  color: #a1a1aa;
+}
+
+.embed-message code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.8125rem;
+  color: #c4b5fd;
+}
