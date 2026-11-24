@@ -1,3 +1,9 @@
+export const ALLOWED_STREAM_HOSTS: readonly string[] = [
+  "video.twimg.com",
+  "serve.octastream.online",
+  "video.sexwave.net"
+];
+
 export const NO_REFERRER_HOSTS: readonly string[] = ["video.twimg.com"];
 
 export const STORAGE_POSITION_PREFIX = "video-player:pos:";
