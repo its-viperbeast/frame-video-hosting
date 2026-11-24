@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import type Hls from "hls.js";
 import {
+  BUFFERING_GIFS,
   DOUBLE_TAP_MS,
   HINT_ANIMATION_MS,
   IDLE_HIDE_MS,
@@ -89,6 +90,7 @@ export function VideoPlayer({
     const time = el<HTMLElement>(".video-player__time");
     const qualityBtn = el<HTMLButtonElement>(".video-player__quality-btn");
     const qualityMenu = el<HTMLElement>(".video-player__quality-menu");
+    const buffering = el<HTMLImageElement>(".video-player__buffering");
     const positionKey = `${STORAGE_POSITION_PREFIX}${storageId(url)}`;
 
     if (noReferrer) {
@@ -96,24 +98,24 @@ export function VideoPlayer({
       if (!isHls) video.src = url;
     }
 
-    const showError = () => root.classList.add("is-error");
-    const togglePlay = () => {
-      if (video.paused) void video.play().catch(() => {});
-      else video.pause();
-    };
-    const isMuted = () => video.muted || !video.volume;
-    const saveMuted = () => {
-      store[STORAGE_MUTED_KEY] = isMuted() ? "1" : "0";
-    };
-
     let resumeAt = Number(store[positionKey]) || 0;
     let idleTimer = 0;
     let tapTimer = 0;
+    let bufferingTimer = 0;
+    let bufferingIndex = 0;
+    let wasWaiting = false;
     let lastTapAt = 0;
     let skipAccum = 0;
     let pickedQuality = -1;
     let hls: Hls | null = null;
     let disposed = false;
+
+    const showError = () => root.classList.add("is-error");
+
+    const togglePlay = () => {
+      if (video.paused) void video.play().catch(() => {});
+      else video.pause();
+    };
 
     const qualityLabel = (level: { height: number; bitrate: number }) =>
       level.height > 0 ? `${level.height}p` : `${Math.round(level.bitrate / 1000)}kbps`;
@@ -195,6 +197,17 @@ export function VideoPlayer({
 
     const actions: Record<string, () => void> = {
       play: togglePlay,
+      start: () => {
+        if (!root.classList.contains("is-started") && resumeAt > 0) {
+          resumeAt = 0;
+          delete store[positionKey];
+          video.currentTime = 0;
+          root.classList.remove("has-resume");
+          void video.play().catch(() => {});
+          return;
+        }
+        togglePlay();
+      },
       back: () => skipBy(-SKIP_SECONDS),
       fwd: () => skipBy(SKIP_SECONDS),
       mute: () => {
@@ -212,13 +225,6 @@ export function VideoPlayer({
         qualityMenu.hidden = !qualityMenu.hidden;
       },
       fs: toggleFullscreen,
-      restart: () => {
-        resumeAt = 0;
-        delete store[positionKey];
-        video.currentTime = 0;
-        root.classList.remove("has-resume");
-        void video.play().catch(() => {});
-      },
       retry: () => location.reload(),
     };
 
@@ -234,9 +240,35 @@ export function VideoPlayer({
 
     const syncUi = () => {
       if (!video.paused) root.classList.add("is-started");
+
+      const waiting = !video.paused && video.readyState < 3;
       root.classList.toggle("is-playing", !video.paused);
-      root.classList.toggle("is-waiting", !video.paused && video.readyState < 3);
-      root.classList.toggle("is-muted", isMuted());
+      root.classList.toggle("is-waiting", waiting);
+
+      if (waiting !== wasWaiting) {
+        wasWaiting = waiting;
+        clearTimeout(bufferingTimer);
+        bufferingTimer = 0;
+        if (waiting) {
+          bufferingIndex = 0;
+          const showStep = () => {
+            const step = BUFFERING_GIFS[bufferingIndex % BUFFERING_GIFS.length];
+            buffering.src = step.src;
+            bufferingTimer = window.setTimeout(() => {
+              bufferingIndex = (bufferingIndex + 1) % BUFFERING_GIFS.length;
+              showStep();
+            }, step.ms);
+          };
+          showStep();
+        } else {
+          bufferingIndex = 0;
+          buffering.removeAttribute("src");
+        }
+      }
+
+      const muted = video.muted || !video.volume;
+      root.classList.toggle("is-muted", muted);
+      store[STORAGE_MUTED_KEY] = muted ? "1" : "0";
       volume.valueAsNumber = video.muted ? 0 : video.volume;
       volume.style.cssText = `--p:${volume.valueAsNumber * 100}%`;
       speed.textContent = `${video.playbackRate}x`;
@@ -277,11 +309,6 @@ export function VideoPlayer({
     const onVolumeInput = () => {
       video.volume = volume.valueAsNumber;
       video.muted = !video.volume;
-      saveMuted();
-    };
-    const onVolumeChange = () => {
-      saveMuted();
-      syncUi();
     };
     const onPointerMove = (event: PointerEvent) => {
       if (event.pointerType === "mouse") wakeControls();
@@ -359,9 +386,7 @@ export function VideoPlayer({
     video.addEventListener("progress", updateProgress);
     video.addEventListener("durationchange", updateProgress);
     video.addEventListener("error", showError);
-    for (const type of SYNC_EVENTS) {
-      video.addEventListener(type, type === "volumechange" ? onVolumeChange : syncUi);
-    }
+    for (const type of SYNC_EVENTS) video.addEventListener(type, syncUi);
     seek.addEventListener("input", onSeekInput);
     seek.addEventListener("pointermove", onSeekPointerMove);
     volume.addEventListener("input", onVolumeInput);
@@ -418,6 +443,8 @@ export function VideoPlayer({
       disposed = true;
       clearTimeout(idleTimer);
       clearTimeout(tapTimer);
+      clearTimeout(bufferingTimer);
+      buffering.removeAttribute("src");
       referrerMeta?.remove();
       hls?.destroy();
       video.removeEventListener("timeupdate", onTimeUpdate);
@@ -425,9 +452,7 @@ export function VideoPlayer({
       video.removeEventListener("progress", updateProgress);
       video.removeEventListener("durationchange", updateProgress);
       video.removeEventListener("error", showError);
-      for (const type of SYNC_EVENTS) {
-        video.removeEventListener(type, type === "volumechange" ? onVolumeChange : syncUi);
-      }
+      for (const type of SYNC_EVENTS) video.removeEventListener(type, syncUi);
       seek.removeEventListener("input", onSeekInput);
       seek.removeEventListener("pointermove", onSeekPointerMove);
       volume.removeEventListener("input", onVolumeInput);
@@ -450,7 +475,7 @@ export function VideoPlayer({
       {poster ? (
         <img className="video-player__poster" src={poster} alt="" draggable={false} />
       ) : null}
-      <span className="video-player__spinner" aria-hidden="true" />
+      <img className="video-player__buffering" alt="" aria-hidden="true" draggable={false} />
       <span className="video-player__hint" aria-hidden="true" />
       {title ? <h1 className="video-player__title">{title}</h1> : null}
 
@@ -459,7 +484,7 @@ export function VideoPlayer({
           <Icon name="rotate-ccw" />
           <b>{SKIP_SECONDS}</b>
         </button>
-        <button type="button" data-act="play" aria-label="Play / Pause">
+        <button type="button" data-act="start" aria-label="Play / Pause">
           <PlayPauseIcons />
         </button>
         <button type="button" data-act="fwd" aria-label={`Forward ${SKIP_SECONDS} seconds`}>
@@ -472,10 +497,6 @@ export function VideoPlayer({
         <button type="button" className="video-player__pill is-brand" data-act="play">
           <Icon name="play" className="fill-current" />
           Resume <span data-at />
-        </button>
-        <button type="button" className="video-player__pill" data-act="restart">
-          <Icon name="rotate-ccw" />
-          Start over
         </button>
       </div>
 

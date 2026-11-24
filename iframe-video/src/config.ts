@@ -3,6 +3,12 @@ export const NO_REFERRER_HOSTS: readonly string[] = ["video.twimg.com"];
 export const STORAGE_POSITION_PREFIX = "video-player:pos:";
 export const STORAGE_MUTED_KEY = "video-player:muted";
 
+export const BUFFERING_GIFS = [
+  { src: "/buffering/1.gif", ms: 2000 },
+  { src: "/buffering/2.gif", ms: 2000 },
+  { src: "/buffering/3.gif", ms: 4000 },
+] as const;
+
 export const IDLE_HIDE_MS = 2500;
 export const DOUBLE_TAP_MS = 350;
 export const SKIP_SECONDS = 10;
