@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import {
   Cloud,
   CloudUpload,
+  CodeXml,
   KeyRound,
   FolderOpen,
   LayoutGrid,
@@ -53,6 +54,7 @@ export function Sidebar({ stats, open, onClose, onLogout, onLock, dark, onTheme 
     { to: "/videos", icon: FolderOpen, label: "All videos", count: stats.total },
     { to: "/tags", icon: Tags, label: "Tags" },
     { to: "/upload", icon: CloudUpload, label: "Upload videos" },
+    { to: "/iframe-generator", icon: CodeXml, label: "Iframe generator" },
     { to: "/change-password", icon: KeyRound, label: "Change password" },
   ];
 
@@ -72,7 +74,7 @@ export function Sidebar({ stats, open, onClose, onLogout, onLock, dark, onTheme 
         aria-modal={mobile && open ? true : undefined}
         aria-label="Workspace navigation"
         id="primary-sidebar"
-        className={`fixed top-0 bottom-0 left-0 z-40 flex w-57 flex-col border-r border-line bg-surface px-5 pt-8 transition-transform duration-200 ${
+        className={`fixed top-0 bottom-0 left-0 z-40 flex w-57 flex-col overflow-y-auto border-r border-line bg-surface px-5 pt-8 transition-transform duration-200 ${
           open ? "translate-x-0" : "-translate-x-full"
         } md:translate-x-0`}
         inert={mobile && !open ? true : undefined}
@@ -179,6 +181,7 @@ const pageTitles = {
   "/videos": "All videos",
   "/tags": "Tags",
   "/upload": "Upload videos",
+  "/iframe-generator": "Iframe generator",
   "/change-password": "Change password",
 };
 

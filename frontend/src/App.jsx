@@ -21,6 +21,7 @@ import Dashboard from "./pages/Dashboard";
 import Tags from "./pages/Tags";
 import Login from "./pages/Login";
 import Upload from "./pages/Upload";
+import IframeGenerator from "./pages/IframeGenerator";
 import ChangePassword from "./pages/ChangePassword";
 
 const initialStats = { total: 0, size: 0, recent: 0, favorites: 0 };
@@ -149,6 +150,7 @@ function Workspace({ dark, onTheme, onSignedOut, onLock }) {
           <Routes>
             <Route path="/upload" element={<Upload />} />
             <Route path="/tags" element={<Tags />} />
+            <Route path="/iframe-generator" element={<IframeGenerator />} />
             <Route path="/change-password" element={<ChangePassword />} />
             <Route
               path="*"

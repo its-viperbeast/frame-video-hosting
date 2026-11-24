@@ -16,6 +16,7 @@ import {
   STORAGE_POSITION_PREFIX,
   SYNC_EVENTS,
 } from "../config";
+import { isHlsPlaylist } from "../lib/decodeVideoUrl";
 import { Icon } from "./icons";
 import "./video-player.css";
 
@@ -58,7 +59,7 @@ export function VideoPlayer({
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const videoUrl = new URL(url);
-  const isHls = videoUrl.pathname.toLowerCase().endsWith(".m3u8");
+  const isHls = isHlsPlaylist(videoUrl);
   const noReferrer = NO_REFERRER_HOSTS.includes(videoUrl.hostname);
 
   useEffect(() => {
