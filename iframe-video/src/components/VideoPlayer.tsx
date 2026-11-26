@@ -15,6 +15,7 @@ import {
   STORAGE_MUTED_KEY,
   STORAGE_POSITION_PREFIX,
   SYNC_EVENTS,
+  VOLUME_PANEL_MS,
 } from "../config";
 import { isHlsPlaylist } from "../lib/decodeVideoUrl";
 import { Icon } from "./icons";
@@ -85,6 +86,8 @@ export function VideoPlayer({
     const video = el<HTMLVideoElement>("video");
     const seek = el<HTMLInputElement>(".video-player__seek");
     const volume = el<HTMLInputElement>(".video-player__vol");
+    const volumeBox = el<HTMLElement>(".video-player__volume");
+    const volumeLabel = el<HTMLElement>(".video-player__vol-pct");
     const tip = el<HTMLElement>(".video-player__tip");
     const hint = el<HTMLElement>(".video-player__hint");
     const speed = el<HTMLElement>(".video-player__speed");
@@ -103,6 +106,7 @@ export function VideoPlayer({
     let idleTimer = 0;
     let tapTimer = 0;
     let bufferingTimer = 0;
+    let volumeTimer = 0;
     let bufferingIndex = 0;
     let wasWaiting = false;
     let lastTapAt = 0;
@@ -171,6 +175,13 @@ export function VideoPlayer({
       }, IDLE_HIDE_MS);
     };
 
+    // Touch has no hover, so the volume slider opens on tap and closes by itself.
+    const showVolume = () => {
+      volumeBox.classList.add("is-open");
+      clearTimeout(volumeTimer);
+      volumeTimer = window.setTimeout(() => volumeBox.classList.remove("is-open"), VOLUME_PANEL_MS);
+    };
+
     const skipBy = (delta: number, label = delta) => {
       if (!video.readyState) return;
       video.currentTime = Math.min(Math.max(video.currentTime + delta, 0), video.duration);
@@ -224,6 +235,7 @@ export function VideoPlayer({
       mute: () => {
         video.muted = !video.muted;
         video.volume ||= 1;
+        showVolume();
       },
       speed: () => {
         video.playbackRate =
@@ -282,6 +294,7 @@ export function VideoPlayer({
       store[STORAGE_MUTED_KEY] = muted ? "1" : "0";
       volume.valueAsNumber = video.muted ? 0 : video.volume;
       volume.style.cssText = `--p:${volume.valueAsNumber * 100}%`;
+      volumeLabel.textContent = String(Math.round(volume.valueAsNumber * 100));
       speed.textContent = `${video.playbackRate}x`;
       wakeControls();
     };
@@ -314,12 +327,14 @@ export function VideoPlayer({
     const onSeekPointerMove = (event: PointerEvent) => {
       const box = seek.getBoundingClientRect();
       const ratio = Math.min(Math.max((event.clientX - box.left) / box.width, 0), 1);
-      tip.style.left = `${ratio * 100}%`;
+      // Clamped so the tip is not cut off at either end of the bar.
+      tip.style.left = `clamp(1.75rem, ${ratio * 100}%, calc(100% - 1.75rem))`;
       tip.textContent = formatTime(ratio * video.duration);
     };
     const onVolumeInput = () => {
       video.volume = volume.valueAsNumber;
       video.muted = !video.volume;
+      showVolume();
     };
     const onPointerMove = (event: PointerEvent) => {
       if (event.pointerType === "mouse") wakeControls();
@@ -468,6 +483,7 @@ export function VideoPlayer({
       clearTimeout(idleTimer);
       clearTimeout(tapTimer);
       clearTimeout(bufferingTimer);
+      clearTimeout(volumeTimer);
       buffering.removeAttribute("src");
       referrerMeta?.remove();
       hls?.destroy();
@@ -556,15 +572,20 @@ export function VideoPlayer({
             <Icon name="volume" className="i-vol" />
             <Icon name="volume-off" className="i-muted" />
           </button>
-          <input
-            type="range"
-            className="video-player__vol"
-            min={0}
-            max={1}
-            step={0.05}
-            defaultValue={1}
-            aria-label="Volume"
-          />
+          <div className="video-player__vol-panel">
+            <span className="video-player__vol-pct" aria-hidden="true" />
+            <div className="video-player__vol-track">
+              <input
+                type="range"
+                className="video-player__vol"
+                min={0}
+                max={1}
+                step={0.05}
+                defaultValue={1}
+                aria-label="Volume"
+              />
+            </div>
+          </div>
         </div>
         <span className="video-player__time">0:00 / 0:00</span>
         <button

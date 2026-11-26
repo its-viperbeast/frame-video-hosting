@@ -36,7 +36,7 @@ export default function Login({ onSuccess, initialError = "" }) {
           Email
         </label>
         <input
-          className="w-full rounded-lg border border-line bg-surface px-3 py-3 text-sm text-ink outline-none focus:border-[#89b6f4] focus:ring-2 focus:ring-[#2877e910]"
+          className="w-full rounded-lg border border-line bg-surface px-3 py-3 text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/25"
           id="login-email"
           name="email"
           type="email"
@@ -54,7 +54,7 @@ export default function Login({ onSuccess, initialError = "" }) {
         </label>
         <div className="relative">
           <input
-            className="w-full rounded-lg border border-line bg-surface px-3 py-3 pr-[45px] text-sm text-ink outline-none focus:border-[#89b6f4] focus:ring-2 focus:ring-[#2877e910]"
+            className="w-full rounded-lg border border-line bg-surface px-3 py-3 pr-[45px] text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/25"
             id="login-password"
             name="password"
             type={showPassword ? "text" : "password"}

@@ -212,8 +212,10 @@ export default function VideoCard({
 
   return (
     <article
-      className={`group min-w-0 rounded-[10px] border bg-surface shadow-[0_3px_6px_#26395408] transition-colors hover:border-[#dbe4f0] hover:shadow-[0_8px_22px_#26395412] ${
-        selected ? "border-[#91b5ee] shadow-[0_0_0_2px_#2877e915]" : "border-line"
+      className={`group min-w-0 rounded-[10px] border bg-surface shadow-[0_3px_6px_#26395408] transition-colors ${
+        selected
+          ? "border-[#91b5ee] shadow-[0_0_0_2px_#2877e915] dark:border-brand"
+          : "border-line hover:border-[#dbe4f0] hover:shadow-[0_8px_22px_#26395412] dark:hover:border-[#35507a]"
       } ${isList ? "flex items-stretch" : ""}`}
     >
       <div
@@ -232,8 +234,10 @@ export default function VideoCard({
         </button>
         {selectable && (
           <button
-            className={`absolute top-2.5 left-2.5 z-[2] grid h-5 w-5 place-items-center rounded border border-[#ffffffaa] bg-[#ffffff33] text-white backdrop-blur-sm transition-opacity hover:opacity-100 focus-visible:opacity-100 ${
-              selected ? "bg-brandsolid opacity-100" : "opacity-0 group-hover:opacity-100"
+            className={`absolute top-2.5 left-2.5 z-[2] grid h-6 w-6 place-items-center rounded border border-[#ffffffaa] text-white backdrop-blur-sm transition-opacity hover:opacity-100 focus-visible:opacity-100 ${
+              selected
+                ? "bg-brandsolid opacity-100"
+                : "bg-black/35 opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100"
             }`}
             aria-label={`Select ${video.name}`}
             aria-pressed={selected}
@@ -242,12 +246,14 @@ export default function VideoCard({
             {selected && <Check size={13} />}
           </button>
         )}
-        <span className="pointer-events-none absolute top-2.5 left-2.5 rounded border border-[#ffffff30] bg-[#122b3e39] px-1.5 py-[3px] text-xs font-semibold tracking-wide text-white backdrop-blur-sm transition-opacity group-hover:opacity-0">
+        <span className="pointer-events-none absolute bottom-2.5 left-2.5 rounded border border-[#ffffff30] bg-[#0b203b66] px-1.5 py-0.5 text-xs font-semibold tracking-wide text-white backdrop-blur-sm">
           MP4
         </span>
         <button
-          className={`absolute top-2 right-2.5 grid h-8 w-8 place-items-center rounded-full bg-[#0b213422] text-white backdrop-blur-[3px] transition-opacity hover:opacity-100 focus-visible:opacity-100 ${
-            video.favorite ? "text-[#fff1ca] opacity-100" : "opacity-0 group-hover:opacity-100"
+          className={`absolute top-2 right-2.5 grid h-8 w-8 place-items-center rounded-full bg-black/35 backdrop-blur-[3px] transition-opacity hover:opacity-100 focus-visible:opacity-100 ${
+            video.favorite
+              ? "text-[#fff1ca] opacity-100"
+              : "text-white opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100"
           }`}
           aria-label={`${video.favorite ? "Remove" : "Add"} ${video.name} ${video.favorite ? "from" : "to"} favorites`}
           onClick={() => onFavorite(video)}

@@ -1,7 +1,8 @@
 export const ALLOWED_STREAM_HOSTS: readonly string[] = [
   "video.twimg.com",
   "serve.octastream.online",
-  "video.sexwave.net"
+  "video.sexwave.net",
+  "test-videos.co.uk"
 ];
 
 export const NO_REFERRER_HOSTS: readonly string[] = ["video.twimg.com"];
@@ -16,6 +17,7 @@ export const BUFFERING_GIFS = [
 ] as const;
 
 export const IDLE_HIDE_MS = 2500;
+export const VOLUME_PANEL_MS = 2000;
 export const DOUBLE_TAP_MS = 350;
 export const SKIP_SECONDS = 10;
 export const HINT_ANIMATION_MS = 700;

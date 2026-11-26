@@ -118,7 +118,7 @@ export function Sidebar({ stats, open, onClose, onLogout, onLock, dark, onTheme 
                 {count > 0 && (
                   <span
                     className={`rounded px-1.5 py-px text-xs leading-4 tabular-nums ${
-                      active ? "bg-[#dceaff] text-brand" : "bg-[#f0f3f7] text-muted dark:bg-line"
+                      active ? "bg-surface text-brand" : "bg-[#f0f3f7] text-muted dark:bg-line"
                     }`}
                   >
                     {count}

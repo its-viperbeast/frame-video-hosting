@@ -48,8 +48,35 @@
   }
 }
 
+/* An inset box-shadow would sit under the <video>, so the ring is an outline. */
+/* Tight space: smaller buttons keep the bar on one row. */
+@container (max-width: 23rem) {
+  .video-player > * {
+    --btn: 2.5rem;
+    --pad: 0.5rem;
+  }
+}
+
+/* Short embeds (phone landscape): free up room so controls don't overlap. */
+@media (max-height: 17rem) {
+  .video-player > * {
+    --btn: 2.5rem;
+    --big: 3rem;
+  }
+
+  /* Two classes, so these beat the base rules defined further down. */
+  .video-player .video-player__title {
+    display: none;
+  }
+
+  .video-player .video-player__bar {
+    padding-top: 1rem;
+  }
+}
+
 .video-player:focus-visible {
-  box-shadow: inset 0 0 0 3px var(--color-brand);
+  outline: 3px solid var(--color-brand);
+  outline-offset: -3px;
 }
 
 .video-player.is-idle {
@@ -141,11 +168,15 @@
 .video-player__center {
   position: absolute;
   inset: 0;
-  z-index: 3;
+  /* Above the bottom bar so short mobile embeds don't steal taps. */
+  z-index: 4;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: calc(var(--big) * 0.5);
+  /* Nudge play / back / forward a little above true center. */
+  padding-bottom: calc(var(--big) * 0.9);
+  box-sizing: border-box;
   pointer-events: none;
 }
 
@@ -223,8 +254,9 @@
 
 .video-player__resume {
   position: absolute;
-  inset: calc(50% + var(--big) / 2 + 1.1rem) 0 auto;
-  z-index: 3;
+  /* Match center control nudge so resume stays just under play. */
+  inset: calc(50% + var(--big) / 2 + 1.1rem - var(--big) * 0.45) 0 auto;
+  z-index: 4;
   display: none;
   justify-content: center;
   flex-wrap: wrap;
@@ -262,7 +294,7 @@
 
   .video-player__resume {
     gap: 0.5rem;
-    inset: calc(50% + var(--big) / 2 + 1.35rem) 0 auto;
+    inset: calc(50% + var(--big) / 2 + 1.35rem - var(--big) * 0.45) 0 auto;
   }
 }
 
@@ -300,11 +332,16 @@
   gap: 0.15rem;
   padding: 2.75rem var(--pad) calc(var(--pad) + 0.15rem);
   background: linear-gradient(transparent, rgb(0 0 0 / 0.55) 35%, rgb(0 0 0 / 0.88));
+  /* Let taps through the gradient padding to center controls. */
+  pointer-events: none;
+}
+
+.video-player__bar > * {
+  pointer-events: auto;
 }
 
 .video-player__bar button,
-.video-player__time,
-.video-player__volume {
+.video-player__time {
   background: rgb(15 15 20 / 0.55);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
@@ -317,8 +354,7 @@
   border-radius: 50%;
 }
 
-.video-player__bar button:hover,
-.video-player__volume:hover {
+.video-player__bar button:hover {
   background: rgb(15 15 20 / 0.75);
 }
 
@@ -371,6 +407,9 @@
   flex-direction: column;
   gap: 0.15rem;
   min-width: 5.5rem;
+  /* Scrolls instead of being clipped when the embed is short. */
+  max-height: calc(100dvh - var(--btn) - 4rem);
+  overflow-y: auto;
   padding: 0.35rem;
   border-radius: 0.65rem;
   background: rgb(15 15 20 / 0.92);
@@ -475,6 +514,13 @@
   margin-top: -4px;
 }
 
+/* Bigger touch target for the seek bar. */
+@media (pointer: coarse) {
+  .video-player input[type="range"] {
+    height: 2rem;
+  }
+}
+
 .video-player__tip {
   position: absolute;
   bottom: calc(100% + 0.15rem);
@@ -498,32 +544,78 @@
 }
 
 .video-player__volume {
+  position: relative;
+  display: grid;
+}
+
+/* Vertical volume slider above the button. Hover opens it on desktop, a tap on touch. */
+.video-player__vol-panel {
+  position: absolute;
+  bottom: calc(100% + 0.5rem);
+  left: 50%;
+  z-index: 4;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  height: var(--btn);
-  padding-right: 0.15rem;
-  border-radius: 9999px;
+  gap: 0.35rem;
+  box-sizing: border-box;
+  width: var(--btn);
+  /* Shrinks on short embeds so the panel is never cut off at the top. */
+  height: max(4.5rem, min(9rem, calc(100dvh - var(--btn) - var(--pad) - 4rem)));
+  padding: 0.65rem 0 0.35rem;
+  border-radius: calc(var(--btn) / 2);
+  background: rgb(15 15 20 / 0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.45);
+  translate: -50% 0;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.15s ease,
+    visibility 0.15s ease;
 }
 
-.video-player__volume > button {
-  background: transparent;
-  box-shadow: none;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
+/* Keeps hover alive while the pointer crosses the gap to the panel. */
+.video-player__vol-panel::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  right: 0;
+  left: 0;
+  height: 0.6rem;
 }
 
-.video-player__volume > button:hover {
-  background: rgb(255 255 255 / 0.12);
+.video-player__volume.is-open .video-player__vol-panel {
+  opacity: 1;
+  visibility: visible;
+}
+
+.video-player__vol-pct {
+  font-size: calc(var(--txt) * 0.85);
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The slider's length is the track's height, so it fills the panel at any size. */
+.video-player__vol-track {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  container-type: size;
 }
 
 .video-player input.video-player__vol {
-  flex: 0 0 auto;
-  width: 0;
-  visibility: hidden;
-  transition:
-    width 0.2s ease,
-    visibility 0.2s ease,
-    margin 0.2s ease;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  flex: none;
+  width: 100cqh;
+  height: 2rem;
+  translate: -50% -50%;
+  rotate: -90deg;
 }
 
 @media (hover: hover) {
@@ -531,9 +623,8 @@
     opacity: 1;
   }
 
-  .video-player .video-player__volume:is(:hover, :focus-within) .video-player__vol {
-    width: 5rem;
-    margin-right: 0.35rem;
+  .video-player__volume:is(:hover, :focus-within) .video-player__vol-panel {
+    opacity: 1;
     visibility: visible;
   }
 }

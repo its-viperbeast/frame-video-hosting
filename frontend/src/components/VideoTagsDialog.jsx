@@ -175,7 +175,7 @@ export default function VideoTagsDialog({ video, onClose, onSaved, onTagClick })
           <Tags size={15} className="pointer-events-none absolute left-3 text-muted" />
           <input
             id="video-tags-input"
-            className="w-full rounded-lg border border-line bg-surface py-3 pr-3 pl-[34px] text-sm text-ink outline-none focus:border-[#89b6f4] focus:ring-2 focus:ring-[#2877e910]"
+            className="w-full rounded-lg border border-line bg-surface py-3 pr-3 pl-[34px] text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/25"
             value={input}
             onChange={(event) => {
               setInput(event.target.value);

@@ -118,7 +118,7 @@ export default function VideoPlayer({ video, onClose }) {
               {formatBytes(video.size)} <span>·</span> {formatDate(video.createdAt)}
             </p>
           </div>
-          <span className="flex items-center gap-1.5 text-xs whitespace-nowrap text-[#73a393]">
+          <span className="flex items-center gap-1.5 text-xs whitespace-nowrap text-[#3d8a72] dark:text-[#73a393]">
             <ShieldCheck size={14} />
             Secure playback
           </span>

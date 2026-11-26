@@ -18,8 +18,15 @@ body,
   text-rendering: optimizeLegibility;
 }
 
+html {
+  /* Stops iOS from inflating text when the phone rotates. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 body {
   overflow: hidden;
+  overscroll-behavior: none;
 }
 
 .embed-shell {

@@ -104,7 +104,7 @@ export default function AdminLock({ onUnlocked, onSignOut }) {
               <div
                 className={`grid h-16 w-14 place-items-center rounded-lg border bg-surface ${
                   focused && index === activeIndex
-                    ? "border-[#89b6f4] ring-2 ring-[#2877e910]"
+                    ? "border-brand ring-2 ring-brand/25"
                     : "border-line"
                 }`}
                 key={index}

@@ -357,7 +357,7 @@ export default function Dashboard({
           ) : (
             <>
               <form
-                className="overview-search mb-6 flex min-h-11 items-center gap-3 rounded-[10px] border border-line bg-surface py-1.5 pr-2 pl-4 text-muted focus-within:border-brand focus-within:ring-2 focus-within:ring-[#2877e91a]"
+                className="overview-search mb-6 flex min-h-11 items-center gap-3 rounded-[10px] border border-line bg-surface py-1.5 pr-2 pl-4 text-muted focus-within:border-brand focus-within:ring-2 focus-within:ring-brand/25"
                 onSubmit={searchOverview}
               >
                 <Search size={17} />
@@ -386,8 +386,8 @@ export default function Dashboard({
                         key={index}
                         className="min-h-[126px] rounded-[10px] border border-line bg-surface p-4"
                       >
-                        <div className="h-3 w-3/5 rounded animate-shimmer bg-gradient-to-r from-[#eaf0f6] via-[#f4f7fb] to-[#eaf0f6] bg-[length:200%_100%]" />
-                        <div className="mt-3 h-2 w-2/5 rounded animate-shimmer bg-gradient-to-r from-[#eaf0f6] via-[#f4f7fb] to-[#eaf0f6] bg-[length:200%_100%]" />
+                        <div className="h-3 w-3/5 rounded animate-shimmer bg-gradient-to-r from-[#eaf0f6] via-[#f4f7fb] to-[#eaf0f6] bg-[length:200%_100%] dark:from-[#1e2f47] dark:via-[#253a57] dark:to-[#1e2f47]" />
+                        <div className="mt-3 h-2 w-2/5 rounded animate-shimmer bg-gradient-to-r from-[#eaf0f6] via-[#f4f7fb] to-[#eaf0f6] bg-[length:200%_100%] dark:from-[#1e2f47] dark:via-[#253a57] dark:to-[#1e2f47]" />
                       </div>
                     ))}
                   </div>
@@ -501,7 +501,7 @@ export default function Dashboard({
           </div>
 
           <div className="mb-4 flex items-center justify-between gap-4 max-sm:flex-wrap">
-            <div className="library-search flex max-w-[420px] min-h-11 min-w-30 flex-1 items-center gap-2.5 rounded-lg border border-line bg-surface px-3 py-2 text-muted focus-within:border-brand focus-within:ring-2 focus-within:ring-[#2877e91a]">
+            <div className="library-search relative flex max-w-[420px] min-h-11 min-w-30 flex-1 items-center gap-2.5 rounded-lg border border-line bg-surface px-3 py-2 text-muted focus-within:border-brand focus-within:ring-2 focus-within:ring-brand/25">
               <Search size={17} />
               <input
                 placeholder="Search your videos…"
@@ -521,7 +521,7 @@ export default function Dashboard({
               )}
             </div>
             <div className="flex items-center gap-2.5">
-              <div className="flex min-h-11 items-center gap-1.5 rounded-lg border border-line bg-surface px-2.5 py-2 text-xs text-muted focus-within:border-brand focus-within:ring-2 focus-within:ring-[#2877e91a]">
+              <div className="flex min-h-11 items-center gap-1.5 rounded-lg border border-line bg-surface px-2.5 py-2 text-xs text-muted focus-within:border-brand focus-within:ring-2 focus-within:ring-brand/25">
                 <ArrowDownUp size={15} className="text-muted" />
                 <select
                   value={sort}

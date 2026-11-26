@@ -110,7 +110,7 @@ export default function TagsPage() {
       </div>
 
       <div className="mb-4 flex items-center justify-between gap-4">
-        <div className="library-search flex max-w-[420px] min-h-11 min-w-30 flex-1 items-center gap-2.5 rounded-lg border border-line bg-surface px-3 py-2 text-muted focus-within:border-brand focus-within:ring-2 focus-within:ring-[#2877e91a]">
+        <div className="library-search relative flex max-w-[420px] min-h-11 min-w-30 flex-1 items-center gap-2.5 rounded-lg border border-line bg-surface px-3 py-2 text-muted focus-within:border-brand focus-within:ring-2 focus-within:ring-brand/25">
           <Search size={17} />
           <input
             placeholder="Search tags…"
@@ -151,8 +151,8 @@ export default function TagsPage() {
         >
           {Array.from({ length: 6 }, (_, i) => (
             <div key={i} className="rounded-[10px] border border-line bg-surface p-4">
-              <div className="h-3 w-3/5 rounded animate-shimmer bg-gradient-to-r from-[#eaf0f6] via-[#f4f7fb] to-[#eaf0f6] bg-[length:200%_100%]" />
-              <div className="mt-3 h-2 w-2/5 rounded animate-shimmer bg-gradient-to-r from-[#eaf0f6] via-[#f4f7fb] to-[#eaf0f6] bg-[length:200%_100%]" />
+              <div className="h-3 w-3/5 rounded animate-shimmer bg-gradient-to-r from-[#eaf0f6] via-[#f4f7fb] to-[#eaf0f6] bg-[length:200%_100%] dark:from-[#1e2f47] dark:via-[#253a57] dark:to-[#1e2f47]" />
+              <div className="mt-3 h-2 w-2/5 rounded animate-shimmer bg-gradient-to-r from-[#eaf0f6] via-[#f4f7fb] to-[#eaf0f6] bg-[length:200%_100%] dark:from-[#1e2f47] dark:via-[#253a57] dark:to-[#1e2f47]" />
             </div>
           ))}
         </div>
@@ -285,7 +285,7 @@ export default function TagsPage() {
             </label>
             <input
               id="tag-rename-input"
-              className="w-full rounded-lg border border-line bg-surface px-3 py-3 text-sm text-ink outline-none focus:border-[#89b6f4] focus:ring-2 focus:ring-[#2877e910]"
+              className="w-full rounded-lg border border-line bg-surface px-3 py-3 text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/25"
               value={editName}
               onChange={(event) => setEditName(event.target.value)}
               maxLength={30}

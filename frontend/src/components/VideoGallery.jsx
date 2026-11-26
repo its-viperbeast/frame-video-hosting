@@ -133,7 +133,7 @@ export default function VideoGallery({
         </div>
       )}
       {!loading && pagination?.total > 0 && (
-        <div className="flex items-center justify-between gap-4 py-5 text-xs text-muted tabular-nums">
+        <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-3 py-5 text-xs text-muted tabular-nums sm:justify-between">
           <span>
             Showing{" "}
             <strong className="font-medium text-ink">
@@ -160,10 +160,10 @@ export default function VideoGallery({
               return (
                 <button
                   key={page}
-                  className={`grid h-9 min-h-9 w-9 place-items-center rounded text-xs text-muted hover:bg-brandlight ${
+                  className={`grid h-9 min-h-9 w-9 place-items-center rounded text-xs hover:bg-brandlight ${
                     pagination.page === page
-                      ? "border border-[#dfeafb] bg-brandlight text-brand"
-                      : ""
+                      ? "border border-[#dfeafb] bg-brandlight text-brand dark:border-line"
+                      : "text-muted"
                   }`}
                   aria-label={`Page ${page}`}
                   aria-current={pagination.page === page ? "page" : undefined}

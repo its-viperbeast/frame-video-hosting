@@ -66,7 +66,7 @@ export default function VideoMetadataDialog({ video, field, onClose, onSaved }) 
         {renaming ? (
           <input
             id="video-metadata-value"
-            className="w-full rounded-lg border border-line bg-surface px-3 py-3 text-sm text-ink outline-none focus:border-[#89b6f4] focus:ring-2 focus:ring-[#2877e910]"
+            className="w-full rounded-lg border border-line bg-surface px-3 py-3 text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/25"
             value={value}
             onChange={(event) => setValue(event.target.value)}
             maxLength={maxLength}
@@ -77,7 +77,7 @@ export default function VideoMetadataDialog({ video, field, onClose, onSaved }) 
         ) : (
           <textarea
             id="video-metadata-value"
-            className="min-h-[130px] w-full resize-y rounded-lg border border-line bg-surface px-3 py-3 text-sm leading-relaxed text-ink outline-none focus:border-[#89b6f4] focus:ring-2 focus:ring-[#2877e910]"
+            className="min-h-[130px] w-full resize-y rounded-lg border border-line bg-surface px-3 py-3 text-sm leading-relaxed text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/25"
             value={value}
             onChange={(event) => setValue(event.target.value)}
             maxLength={maxLength}
