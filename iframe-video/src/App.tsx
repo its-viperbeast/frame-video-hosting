@@ -32,7 +32,7 @@ function VideoPage() {
 
   return (
     <div className="embed-shell">
-      <VideoPlayer url={payload.url} poster={payload.thumbnail} title={payload.title} />
+      <VideoPlayer url={payload.url} poster={payload.thumbnail} />
     </div>
   );
 }

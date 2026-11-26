@@ -14,11 +14,9 @@ const { Player } = createPlayer({
 export function VideoPlayer({
   url,
   poster,
-  title,
 }: {
   url: string;
   poster?: string;
-  title?: string;
 }) {
   const videoUrl = new URL(url);
   const noReferrer = NO_REFERRER_HOSTS.includes(videoUrl.hostname);
@@ -35,7 +33,7 @@ export function VideoPlayer({
   }, [noReferrer]);
 
   return (
-    <Player poster={poster} title={title}>
+    <Player poster={poster}>
       <VideoSkin
         style={
           {
