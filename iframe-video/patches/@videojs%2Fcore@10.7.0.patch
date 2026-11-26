@@ -1,0 +1,22 @@
+diff --git a/dist/default/dom/gesture/tap.js b/dist/default/dom/gesture/tap.js
+index f1b1fc87a4349ff9b47c86feae42da9ecdcefe77..41f61f6394a6b258b613100bf472ce82ee1ab377 100644
+--- a/dist/default/dom/gesture/tap.js
++++ b/dist/default/dom/gesture/tap.js
+@@ -1,5 +1,5 @@
+ //#region src/dom/gesture/tap.ts
+-const DOUBLETAP_WINDOW = 200;
++const DOUBLETAP_WINDOW = 500;
+ /**
+ * Recognizes tap vs doubletap from quick pointer-up events.
+ *
+diff --git a/dist/dev/dom/gesture/tap.js b/dist/dev/dom/gesture/tap.js
+index ee784ebb149827c95196a7aaca3936167f8a4ea5..51e677eeadb253c65f1fb163bd2781bdf067b55f 100644
+--- a/dist/dev/dom/gesture/tap.js
++++ b/dist/dev/dom/gesture/tap.js
+@@ -1,5 +1,5 @@
+ //#region src/dom/gesture/tap.ts
+-const DOUBLETAP_WINDOW = 200;
++const DOUBLETAP_WINDOW = 500;
+ /**
+ * Recognizes tap vs doubletap from quick pointer-up events.
+ *
