@@ -549,6 +549,10 @@ export function VideoPlayer({
           <Icon name="play" className="fill-current" />
           Resume <span data-at />
         </button>
+        <button type="button" className="video-player__pill" data-act="start">
+          <Icon name="rotate-ccw" />
+          Start over
+        </button>
       </div>
 
       <div className="video-player__bar">
