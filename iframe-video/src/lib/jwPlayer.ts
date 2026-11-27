@@ -43,6 +43,7 @@ export function ensureJwPlayer(): Promise<void> {
       };
       const script = document.createElement("script");
       script.src = "/js/jwplayer.js";
+      script.referrerPolicy = "origin";
       script.onload = () => {
         if (typeof window.jwplayer === "function") resolve();
         else fail("JW Player failed to initialize.");
