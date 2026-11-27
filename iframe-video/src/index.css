@@ -135,9 +135,7 @@ body {
 .embed-play-gate__scrim {
   position: absolute;
   inset: 0;
-  background:
-    linear-gradient(to bottom, rgb(0 0 0 / 0.75), transparent 45%),
-    radial-gradient(ellipse at center, transparent 55%, rgb(0 0 0 / 0.4));
+  background: radial-gradient(ellipse at center, transparent 55%, rgb(0 0 0 / 0.4));
 }
 
 .embed-play-gate__play,
@@ -187,24 +185,6 @@ body {
   outline-offset: -3px;
 }
 
-.embed-play-gate__title {
-  position: absolute;
-  top: 0;
-  right: 0;
-  left: 0;
-  display: -webkit-box;
-  padding: 1rem 1.25rem 2.5rem;
-  overflow: hidden;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  font-size: clamp(0.95rem, 3vw, 1.2rem);
-  font-weight: 600;
-  line-height: 1.35;
-  text-align: left;
-  color: #fff;
-  text-shadow: 0 1px 8px rgb(0 0 0 / 0.8);
-}
-
 .embed-play-gate--choices .embed-play-gate__choice {
   pointer-events: auto;
 }
@@ -246,7 +226,7 @@ body {
   padding: 0.6rem 1.25rem;
   background: rgb(255 255 255 / 0.12);
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.35);
-  backdrop-filter: blur(6px);
+  backdrop-filter: blur(12px);
 }
 
 .embed-play-gate__choice--primary:hover,
@@ -263,6 +243,25 @@ body {
 .embed-play-gate__choice:focus-visible {
   outline: 3px solid #8b5cf6;
   outline-offset: 2px;
+}
+
+/* Small embeds (mobile-sized iframes): shrink the choice buttons. */
+@media (max-width: 480px) {
+  .embed-play-gate__choices {
+    gap: 0.55rem;
+  }
+
+  .embed-play-gate__choice {
+    font-size: 0.8rem;
+  }
+
+  .embed-play-gate__choice--primary {
+    padding: 0.6rem 1.2rem;
+  }
+
+  .embed-play-gate__choice--secondary {
+    padding: 0.45rem 1rem;
+  }
 }
 
 @keyframes gate-fade-in {

@@ -117,7 +117,7 @@ export function VideoPlayer({
       <span className="embed-play-gate__scrim" aria-hidden="true" />
     </>
   );
-  const gateTitle = title ? <span className="embed-play-gate__title">{title}</span> : null;
+
 
   return (
     <div ref={rootRef} className="embed-player-root">
@@ -136,7 +136,6 @@ export function VideoPlayer({
                 <path d={PLAY_PATH} />
               </svg>
             </span>
-            {gateTitle}
           </button>
         ) : (
           <div className="embed-play-gate embed-play-gate--choices">
@@ -165,7 +164,6 @@ export function VideoPlayer({
                 Start over
               </button>
             </div>
-            {gateTitle}
           </div>
         ))}
     </div>
