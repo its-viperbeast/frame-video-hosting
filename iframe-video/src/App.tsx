@@ -18,7 +18,7 @@ function VideoPage() {
   const payload = encoded ? decodeVideoPayload(encoded) : null;
 
   useEffect(() => {
-    document.title = payload?.title || "Video";
+    document.title = payload?.title || "Iframe Video Player";
   }, [payload?.title]);
 
   if (!encoded || !payload) {
