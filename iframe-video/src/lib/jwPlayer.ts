@@ -215,7 +215,7 @@ function attachDoubleClickSeek(player: JwPlayerInstance, root: HTMLElement): voi
   );
 }
 
-function readResume(key: string): number | null {
+export function getResumePosition(key: string): number | null {
   try {
     const raw = localStorage.getItem(STORAGE_PREFIX + key);
     if (!raw) return null;
@@ -223,7 +223,7 @@ function readResume(key: string): number | null {
     const position = Number(data?.t);
     if (!Number.isFinite(position) || position <= MIN_RESUME_SECONDS) return null;
     if (typeof data?.ts === "number" && Date.now() - data.ts > MAX_AGE_MS) {
-      localStorage.removeItem(STORAGE_PREFIX + key);
+      clearResumePosition(key);
       return null;
     }
     return position;
@@ -232,21 +232,24 @@ function readResume(key: string): number | null {
   }
 }
 
+export function clearResumePosition(key: string): void {
+  try {
+    localStorage.removeItem(STORAGE_PREFIX + key);
+  } catch {
+    /* ignore */
+  }
+}
+
+// The saved position is read at play time, not setup time: the gate's
+// "Start over" clears it between setup and play.
 function attachResume(player: JwPlayerInstance, key: string): void {
-  const saved = readResume(key);
-  let resumed = saved === null;
+  let saved: number | null = null;
+  let resumed = false;
   let lastSave = 0;
   let lastSeekTry = 0;
   // True while a seek we triggered is in flight; a user seek ends auto-resume.
   let selfSeek = false;
 
-  const clear = () => {
-    try {
-      localStorage.removeItem(STORAGE_PREFIX + key);
-    } catch {
-      /* ignore */
-    }
-  };
   const persist = () => {
     const current = player.getPosition();
     if (!Number.isFinite(current) || current <= MIN_RESUME_SECONDS) return;
@@ -261,20 +264,24 @@ function attachResume(player: JwPlayerInstance, key: string): void {
     selfSeek = true;
     player.seek(saved);
   };
-  const resume = () => {
-    if (resumed || saved === null) return;
+
+  player.once("play", () => {
+    saved = getResumePosition(key);
+    if (saved === null) {
+      resumed = true;
+      return;
+    }
     const duration = player.getDuration();
     if (duration > 0 && saved >= duration - END_GRACE_SECONDS) {
       resumed = true;
-      clear();
+      clearResumePosition(key);
       return;
     }
     seekToSaved();
-  };
-
+  });
   player.on("seek", () => {
     if (selfSeek) selfSeek = false;
-    else resumed = true;
+    else if (saved !== null) resumed = true;
   });
   player.on("time", () => {
     const now = Date.now();
@@ -294,6 +301,5 @@ function attachResume(player: JwPlayerInstance, key: string): void {
   const onPageHide = () => persist();
   window.addEventListener("pagehide", onPageHide);
   player.on("remove", () => window.removeEventListener("pagehide", onPageHide));
-  player.on("complete", clear);
-  if (saved !== null) player.once("play", resume);
+  player.on("complete", () => clearResumePosition(key));
 }
