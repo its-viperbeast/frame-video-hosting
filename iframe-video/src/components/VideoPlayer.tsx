@@ -1,28 +1,33 @@
-import "@videojs/react/video/skin.css";
-import { useInsertionEffect, type CSSProperties } from "react";
-import { createPlayer, pipFeature, remotePlaybackFeature } from "@videojs/react";
-import { Video, VideoSkin, videoFeatures } from "@videojs/react/video";
-import { HlsVideo } from "@videojs/react/media/hls-video";
+import { useEffect, useId, useInsertionEffect, useRef, useState } from "react";
 import { NO_REFERRER_HOSTS } from "../config";
 import { isHlsPlaylist } from "../lib/decodeVideoUrl";
-
-// Skin buttons render nothing when their feature is absent, so this drops the PiP and cast/AirPlay buttons.
-const { Player } = createPlayer({
-  features: videoFeatures.filter((f) => f !== pipFeature && f !== remotePlaybackFeature),
-});
+import {
+  ensureJwPlayer,
+  playWithSound,
+  setupJwPlayer,
+  type JwPlayerInstance,
+} from "../lib/jwPlayer";
 
 export function VideoPlayer({
   url,
   poster,
+  title,
 }: {
   url: string;
   poster?: string;
+  title?: string;
 }) {
   const videoUrl = new URL(url);
   const noReferrer = NO_REFERRER_HOSTS.includes(videoUrl.hostname);
-  const Media = isHlsPlaylist(videoUrl) ? HlsVideo : Video;
+  const fileType = isHlsPlaylist(videoUrl) ? "hls" : "mp4";
+  const targetId = `embed-jw-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
+  const rootRef = useRef<HTMLDivElement>(null);
+  const targetRef = useRef<HTMLDivElement>(null);
+  const playerRef = useRef<JwPlayerInstance | null>(null);
+  const [gateVisible, setGateVisible] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
 
-  // Insertion effects run before child media effects, so the HLS loader's first fetch already omits the referrer.
+  // Insertion effects run before the player's first fetch, so the HLS loader already omits the referrer.
   useInsertionEffect(() => {
     if (!noReferrer) return;
     const meta = document.createElement("meta");
@@ -32,21 +37,83 @@ export function VideoPlayer({
     return () => meta.remove();
   }, [noReferrer]);
 
+  useEffect(() => {
+    let cancelled = false;
+    ensureJwPlayer()
+      .then(() => {
+        if (cancelled || !targetRef.current || !rootRef.current) return;
+        const player = setupJwPlayer(targetRef.current, rootRef.current, {
+          src: url,
+          fileType,
+          poster,
+          title,
+          resumeKey: url,
+          onPlay: () => setGateVisible(false),
+        });
+        playerRef.current = player;
+      })
+      .catch(() => {
+        if (!cancelled) setLoadFailed(true);
+      });
+    return () => {
+      cancelled = true;
+      try {
+        playerRef.current?.remove();
+      } catch {
+        /* player already torn down */
+      }
+      playerRef.current = null;
+    };
+    // The payload is fixed for the page; a new URL remounts through the router.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Dismiss first so the click counts as a user gesture, then play with sound.
+  const handleGateClick = () => {
+    setGateVisible(false);
+    if (playerRef.current) playWithSound(playerRef.current);
+  };
+
+  if (loadFailed) {
+    return (
+      <div className="embed-message">
+        <p className="embed-message__title">Player failed to load</p>
+        <p className="embed-message__body">Check your connection and reload the page.</p>
+      </div>
+    );
+  }
+
   return (
-    <Player poster={poster}>
-      <VideoSkin
-        style={
-          {
-            width: "100%",
-            height: "100%",
-            // Full-bleed in the host iframe: no hairline or rounded corners.
-            "--media-border-color": "transparent",
-            "--media-border-radius": "0",
-          } as CSSProperties
-        }
-      >
-        <Media src={url} playsInline />
-      </VideoSkin>
-    </Player>
+    <div ref={rootRef} className="embed-player-root">
+      <div ref={targetRef} id={targetId} className="embed-player" aria-label={title} />
+      {gateVisible && (
+        <button
+          type="button"
+          className="embed-play-gate"
+          onClick={handleGateClick}
+          aria-label={title ? `Play ${title}` : "Play video"}
+        >
+          {poster && (
+            <img
+              src={poster}
+              alt=""
+              loading="eager"
+              decoding="async"
+              draggable="false"
+              className="embed-play-gate__poster"
+            />
+          )}
+          <span className="embed-play-gate__scrim" aria-hidden="true" />
+          <span className="embed-play-gate__cta" aria-hidden="true">
+            <span className="embed-play-gate__play">
+              <svg viewBox="0 0 24 24" focusable="false">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            </span>
+            <span className="embed-play-gate__label">Play</span>
+          </span>
+        </button>
+      )}
+    </div>
   );
 }

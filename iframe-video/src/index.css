@@ -71,3 +71,219 @@ body {
   font-size: 0.8125rem;
   color: #c4b5fd;
 }
+
+/* JWPlayer embed (ported from p-tape) */
+.embed-player-root {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: #000;
+}
+
+.embed-player {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.embed-player-root .jwplayer,
+.embed-player-root .jw-wrapper {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* JW keeps an invisible "next" slot to balance rewind; our forward button takes that slot. */
+.embed-player-root .jw-display-icon-next {
+  display: none !important;
+}
+
+.embed-play-gate {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  background: #000;
+  color: inherit;
+}
+
+.embed-play-gate * {
+  pointer-events: none;
+}
+
+.embed-play-gate__poster {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  user-select: none;
+}
+
+.embed-play-gate__scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgb(0 0 0 / 0.55), rgb(0 0 0 / 0.2) 45%, rgb(0 0 0 / 0.35));
+}
+
+.embed-play-gate__cta {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.embed-play-gate__play {
+  display: grid;
+  place-items: center;
+  width: 4.25rem;
+  height: 4.25rem;
+  border-radius: 9999px;
+  background: rgb(255 255 255 / 0.92);
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.35);
+  transition: transform 160ms ease, background-color 160ms ease;
+}
+
+.embed-play-gate__play svg {
+  width: 1.75rem;
+  height: 1.75rem;
+  margin-left: 0.125rem;
+  fill: #8b5cf6;
+}
+
+.embed-play-gate:hover .embed-play-gate__play,
+.embed-play-gate:focus-visible .embed-play-gate__play {
+  transform: scale(1.06);
+  background: #fff;
+}
+
+.embed-play-gate:focus-visible {
+  outline: 3px solid #8b5cf6;
+  outline-offset: -3px;
+}
+
+.embed-play-gate__label {
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: 0 1px 8px rgb(0 0 0 / 0.7);
+}
+
+/* Double-click seek feedback */
+.seek-flash {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 30;
+  width: 38%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  overflow: hidden;
+  pointer-events: none;
+  background: rgb(255 255 255 / 0.12);
+  color: #fff;
+  animation: seek-fade 750ms ease forwards;
+}
+
+.seek-flash[data-side='back'] {
+  left: 0;
+  border-radius: 0 50% 50% 0 / 0 50% 50% 0;
+}
+
+.seek-flash[data-side='fwd'] {
+  right: 0;
+  border-radius: 50% 0 0 50% / 50% 0 0 50%;
+}
+
+.seek-flash__ripple {
+  position: absolute;
+  width: 30rem;
+  height: 30rem;
+  margin: -15rem 0 0 -15rem;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.15);
+  animation: seek-ripple 600ms ease-out forwards;
+}
+
+.seek-flash__arrows {
+  position: relative;
+  display: flex;
+  gap: 0.15rem;
+}
+
+.seek-flash[data-side='back'] .seek-flash__arrows {
+  transform: scaleX(-1);
+}
+
+.seek-flash__arrows i {
+  width: 0;
+  height: 0;
+  border-top: 0.55rem solid transparent;
+  border-bottom: 0.55rem solid transparent;
+  border-left: 0.8rem solid #fff;
+  opacity: 0.25;
+  animation: seek-arrow 600ms ease forwards;
+}
+
+.seek-flash__arrows i:nth-child(2) {
+  animation-delay: 120ms;
+}
+
+.seek-flash__arrows i:nth-child(3) {
+  animation-delay: 240ms;
+}
+
+.seek-flash__label {
+  position: relative;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-shadow: 0 1px 6px rgb(0 0 0 / 0.6);
+}
+
+@keyframes seek-fade {
+  0% { opacity: 0; }
+  12%, 70% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes seek-ripple {
+  from { transform: scale(0); opacity: 1; }
+  to { transform: scale(1); opacity: 0; }
+}
+
+@keyframes seek-arrow {
+  0%, 100% { opacity: 0.25; }
+  40% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .embed-play-gate__play {
+    transition: none;
+  }
+
+  .embed-play-gate:hover .embed-play-gate__play,
+  .embed-play-gate:focus-visible .embed-play-gate__play {
+    transform: none;
+  }
+
+  .seek-flash__ripple {
+    display: none;
+  }
+
+  .seek-flash__arrows i {
+    animation: none;
+    opacity: 1;
+  }
+}
